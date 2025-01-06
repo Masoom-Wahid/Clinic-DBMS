@@ -17,6 +17,10 @@ import {
   TabsBody,
   Tab,
   TabPanel,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
 } from '@material-tailwind/react';
 
 import {
@@ -77,6 +81,10 @@ export default function PatientDetail() {
 
   const [laboratoryData, setLaboratoryData] = useState([]);
 
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+  const [patientId] = useState(state?.id);
+
   useEffect(() => {
     const fetchPatientData = async () => {
       const patientId = state.id;
@@ -126,8 +134,9 @@ export default function PatientDetail() {
 
   // Delete
   const handleDelete = async () => {
-    const patientId = state.id;
-
+    if (!patientId) {
+      return;
+    }
     const response = await del(`/api/patient/${patientId}/`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -334,7 +343,7 @@ export default function PatientDetail() {
           >
             <PencilIcon style={{ height: '20px' }} />
           </Link>
-          <Link onClick={handleDelete}>
+          <Link onClick={() => setOpenDeleteDialog(true)}>
             <TrashIcon style={{ height: '20px' }} />
           </Link>
 
@@ -691,7 +700,7 @@ export default function PatientDetail() {
                                 to={`/dashboard/dental-lab/edit/${lab.id}`}
                                 state={{
                                   data: lab,
-                                  patientId: state.id,
+                                  patientId: patientId,
                                   patientName: `${patient.name} ${patient.last_name}`,
                                   patientPhoneNumber: patient.phone_no,
                                 }}
@@ -717,6 +726,29 @@ export default function PatientDetail() {
           </Tabs>
         </div>
       </div>
+      <Dialog
+        open={openDeleteDialog}
+        handler={() => setOpenDeleteDialog(false)}
+      >
+        <DialogHeader>Confirm Deletion</DialogHeader>
+        <DialogBody>
+          Are you sure you want to delete this patient? This action cannot be
+          undone.
+        </DialogBody>
+        <DialogFooter>
+          <Button
+            variant="text"
+            color="gray"
+            onClick={() => setOpenDeleteDialog(false)}
+            className="mr-1"
+          >
+            Cancel
+          </Button>
+          <Button variant="gradient" color="red" onClick={handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 }
