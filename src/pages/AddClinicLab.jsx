@@ -11,15 +11,19 @@ export default function AddClinicLab({ isEditing = false }) {
   const navigate = useNavigate();
   const { state } = useLocation();
   const data = useMemo(() => state?.data || {}, [state]);
+  const patientData = state;
 
   const [formData, setFormData] = useState({
-    name: '',
+    name: patientData?.patientName || '',
     teeths: '',
     day: '',
     to: '',
-    phone_no: '',
+    phone_no: patientData?.patientPhoneNumber || '',
     is_called: false,
     is_done: false,
+    patient: patientData?.patientId || null,
+    labratory_name: '',
+    dental_type: '',
   });
 
   const [teethGraph, setTeethGraph] = useState({});
@@ -75,7 +79,11 @@ export default function AddClinicLab({ isEditing = false }) {
     });
 
     if (response.success) {
-      navigate('/dashboard/dental-lab/');
+      if (patientData?.patientId) {
+        navigate(-1);
+      } else {
+        navigate('/dashboard/dental-lab/');
+      }
     } else {
       setFormError(
         isEditing
@@ -95,6 +103,8 @@ export default function AddClinicLab({ isEditing = false }) {
         phone_no: data.phone_no || '',
         is_called: data.is_called || false,
         is_done: data.is_done || false,
+        labratory_name: data.labratory_name || '',
+        dental_type: data.dental_type || '',
       });
 
       const teethObject = data.teeths.split(',').reduce((acc, curr) => {
@@ -121,9 +131,17 @@ export default function AddClinicLab({ isEditing = false }) {
               label="Name"
               color="teal"
               type="text"
-              required
+              required={!patientData?.patientId}
               value={formData.name}
               onChange={handleChange}
+              disabled={patientData?.patientId ?? data.patient}
+              className={
+                patientData?.patientId
+                  ? 'opacity-70'
+                  : data.patient
+                  ? 'opacity-70'
+                  : ''
+              }
             />
 
             <Typography>Teeths</Typography>
@@ -178,6 +196,36 @@ export default function AddClinicLab({ isEditing = false }) {
               color="teal"
               type="text"
               value={formData.phone_no}
+              onChange={handleChange}
+              disabled={patientData?.patientId ?? data.patient}
+              className={
+                patientData?.patientId
+                  ? 'opacity-70'
+                  : data.patient
+                  ? 'opacity-70'
+                  : ''
+              }
+            />
+
+            <Typography>Labratory Name</Typography>
+            <Input
+              size="sm"
+              name="labratory_name"
+              label="Labratory Name"
+              color="teal"
+              type="text"
+              value={formData.labratory_name}
+              onChange={handleChange}
+            />
+
+            <Typography>Dental Type</Typography>
+            <Input
+              size="sm"
+              name="dental_type"
+              label="Dental Type"
+              color="teal"
+              type="text"
+              value={formData.dental_type}
               onChange={handleChange}
             />
 

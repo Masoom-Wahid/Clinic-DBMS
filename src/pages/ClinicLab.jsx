@@ -10,42 +10,47 @@ import { Link } from 'react-router-dom';
 import Mypagination from '../components/MyPagination';
 
 export default function ClinicLab() {
-  const [lab, setlab] = useState([]);
+  const [labs, setLabs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
-  // Calculate the indexes for the current page
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = lab.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Calculate total pages
-  const totalPages = Math.ceil(lab.length / itemsPerPage);
-
-  // Function to change page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
   useEffect(() => {
-    const get_data = async () => {
-      const response = await get(`/api/lab/`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (!response.success) {
-        return;
-      }
+    const fetchLabs = async () => {
+      try {
+        setIsLoading(true);
+        const response = await get('/api/lab/', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
 
-      const data = response?.data;
-      if (!data) {
-        return;
+        if (response.success && response.data) {
+          setLabs(response.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching labs:', error);
+      } finally {
+        setIsLoading(false);
       }
-
-      setlab(data?.results);
     };
 
-    get_data();
+    fetchLabs();
   }, []);
+
+  // Calculate pagination values based on labs array
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = labs.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(labs.length / itemsPerPage);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-48">
+        <Typography>Loading...</Typography>
+      </div>
+    );
+  }
 
   const handleDelete = async (id) => {
     const response = await del(`/api/lab/${id}/`, {
@@ -55,7 +60,7 @@ export default function ClinicLab() {
     });
 
     if (response.success) {
-      setlab((prev) => prev.filter((a) => a.id !== id));
+      setLabs((prev) => prev.filter((a) => a.id !== id));
     } else {
       console.error('Could not delete the lab');
     }
@@ -117,7 +122,16 @@ export default function ClinicLab() {
                         color="blue-gray"
                         className="font-normal leading-none opacity-70"
                       >
-                        Teeths
+                        Labratory Name
+                      </Typography>
+                    </th>
+                    <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal leading-none opacity-70"
+                      >
+                        Dental Type
                       </Typography>
                     </th>
                     <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
@@ -185,7 +199,16 @@ export default function ClinicLab() {
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {lab.teeths}
+                          {lab.labratory_name}
+                        </Typography>
+                      </td>
+                      <td className="p-4">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-normal"
+                        >
+                          {lab.dental_type}
                         </Typography>
                       </td>
                       <td className="p-4">
@@ -249,7 +272,7 @@ export default function ClinicLab() {
               <Mypagination
                 totalPages={totalPages}
                 currentPage={currentPage}
-                paginate={paginate}
+                paginate={setCurrentPage}
               />
             </div>
           </div>

@@ -19,7 +19,12 @@ import {
   TabPanel,
 } from '@material-tailwind/react';
 
-import { PencilIcon, TrashIcon, ShareIcon } from '@heroicons/react/24/outline';
+import {
+  PencilIcon,
+  TrashIcon,
+  ShareIcon,
+  PlusIcon,
+} from '@heroicons/react/24/outline';
 
 import { get, del, put, post } from '../utils/ApiFetch';
 
@@ -70,6 +75,8 @@ export default function PatientDetail() {
   const [openShare, setOpenShare] = useState(false);
   const handleOpenShare = () => setOpenShare(!openShare);
 
+  const [laboratoryData, setLaboratoryData] = useState([]);
+
   useEffect(() => {
     const fetchPatientData = async () => {
       const patientId = state.id;
@@ -90,15 +97,27 @@ export default function PatientDetail() {
       setTreatments(data.treatments);
       setLogs(data.logs);
       setData(data);
-      // const updatedData = Object.keys(data.data).reduce((acc, key) => {
-      //   acc[key] =
-      //     data.data[key] == null || data.data[key] == ""
-      //       ? "N/A"
-      //       : data.data[key];
-      //   return acc;
-      // }, {});
-
       setPatient(data.data);
+
+      // Fetch laboratory data for the user
+      const labResponse = await get(`/api/lab/`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        params: {
+          patientId,
+        },
+      });
+
+      if (!labResponse.success) {
+        setError('Failed to fetch laboratory data');
+        setLoading(false);
+        return;
+      }
+
+      // Assuming you want to store the laboratory data in a state
+      setLaboratoryData(labResponse.data); // Make sure to define setLaboratoryData and laboratoryData state
+
       setLoading(false);
     };
 
@@ -134,6 +153,14 @@ export default function PatientDetail() {
     currentPage: currentPageTreatment,
     paginate: paginateTreatment,
   } = usePagination(treatments);
+
+  const {
+    // eslint-disable-next-line no-unused-vars
+    currentItems: labItems,
+    totalPages: totalPagesLab,
+    currentPage: currentPageLab,
+    paginate: paginateLab,
+  } = usePagination(laboratoryData);
 
   // Check if loading or error states
   if (loading) return <p>Loading patient data...</p>;
@@ -202,11 +229,16 @@ export default function PatientDetail() {
           if (!new_treatment.paid) {
             new_treatment.paid = '0';
           }
-          if (!(parseFloat(new_treatment.paid) > parseFloat(new_treatment.real_amount))){
-              const newAmount = new_treatment.real_amount - new_treatment.paid;
-              new_treatment.real_amount = newAmount;
-          }else{
-              alert("Invalid Amount ");
+          if (
+            !(
+              parseFloat(new_treatment.paid) >
+              parseFloat(new_treatment.real_amount)
+            )
+          ) {
+            const newAmount = new_treatment.real_amount - new_treatment.paid;
+            new_treatment.real_amount = newAmount;
+          } else {
+            alert('Invalid Amount ');
           }
           setFormError('');
           return new_treatment;
@@ -220,7 +252,9 @@ export default function PatientDetail() {
   };
 
   const handleUpdate = async (new_treatment) => {
-    if (parseFloat(new_treatment.paid) > parseFloat(new_treatment.real_amount)){
+    if (
+      parseFloat(new_treatment.paid) > parseFloat(new_treatment.real_amount)
+    ) {
       return;
     }
     const newResponse = await put(`/api/treatment/${new_treatment.id}/`, {
@@ -253,6 +287,37 @@ export default function PatientDetail() {
       }
       setFormError('');
     }
+  };
+
+  const Table_head_laboratory = [
+    'Start Date',
+    'End Date',
+    'Labratory Name',
+    'Dental Type',
+    'Status',
+    'Action',
+  ];
+
+  const handleAddLab = () => {
+    navigate('/dashboard/dental-lab/add', {
+      state: {
+        patientId: state.id,
+        patientName: `${patient.name} ${patient.last_name}`,
+        patientPhoneNumber: patient.phone_no,
+      },
+    });
+  };
+
+  const getColor = (state) => {
+    return state === 'waiting'
+      ? 'orange'
+      : state === 'pending'
+      ? 'orange'
+      : state === 'done'
+      ? 'green'
+      : state === 'warning'
+      ? 'red'
+      : 'black'; // default color if none of the states match
   };
 
   return (
@@ -380,6 +445,9 @@ export default function PatientDetail() {
               </Tab>
               <Tab key="treatment" value="treatment">
                 Treatment
+              </Tab>
+              <Tab key="labratory" value="labratory">
+                Labratory
               </Tab>
             </TabsHeader>
             <TabsBody>
@@ -533,6 +601,116 @@ export default function PatientDetail() {
                     handleAddTreatment={handleAddTreatment}
                     error={formError}
                   />
+                </div>
+              </TabPanel>
+              <TabPanel key="labratory" value="labratory">
+                <div className="tab ">
+                  <div className="flex justify-end addLabBtn">
+                    <Button
+                      className="flex items-center gap-2"
+                      onClick={handleAddLab}
+                    >
+                      <PlusIcon className="h-5 w-5" />
+                      Add Laboratory
+                    </Button>
+                  </div>
+
+                  <Card className="table-body h-full w-full overflow-scroll">
+                    <table className="w-full min-w-max table-auto text-left">
+                      <thead>
+                        <tr>
+                          {Table_head_laboratory.map((head) => (
+                            <th
+                              key={head}
+                              className="border-b border-blue-gray-100 bg-blue-gray-50 p-4"
+                            >
+                              <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal leading-none opacity-70"
+                              >
+                                {head}
+                              </Typography>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {laboratoryData.map((lab, index) => (
+                          <tr
+                            key={index + 1}
+                            className="even:bg-blue-gray-50/50"
+                          >
+                            <td className="p-4">
+                              <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                              >
+                                {new Date(lab.day).toLocaleString()}
+                              </Typography>
+                            </td>
+                            <td className="p-4">
+                              <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                              >
+                                {new Date(lab.to).toLocaleString()}
+                              </Typography>
+                            </td>
+                            <td className="p-4">
+                              <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                              >
+                                {lab.labratory_name}
+                              </Typography>
+                            </td>
+                            <td className="p-4">
+                              <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                              >
+                                {lab.dental_type}
+                              </Typography>
+                            </td>
+                            <td className="p-4">
+                              <Typography
+                                variant="small"
+                                className={`font-normal px-2 py-1 rounded-full  inline-block`}
+                                color={getColor(lab.status)}
+                              >
+                                {lab.status}
+                              </Typography>
+                            </td>
+                            <td className="p-4">
+                              <Link
+                                to={`/dashboard/dental-lab/edit/${lab.id}`}
+                                state={{
+                                  data: lab,
+                                  patientId: state.id,
+                                  patientName: `${patient.name} ${patient.last_name}`,
+                                  patientPhoneNumber: patient.phone_no,
+                                }}
+                              >
+                                <Button>Edit</Button>
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </Card>
+                  <div className="table-pag">
+                    <Mypagination
+                      totalPages={totalPagesLab}
+                      currentPage={currentPageLab}
+                      paginate={paginateLab}
+                    />
+                  </div>
                 </div>
               </TabPanel>
             </TabsBody>

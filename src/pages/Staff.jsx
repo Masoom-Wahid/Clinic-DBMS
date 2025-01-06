@@ -40,7 +40,6 @@ export default function Staff() {
       }
 
       const data = response?.data;
-      console.log(data);
 
       if (!data || !data.results) {
         return;
