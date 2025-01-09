@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../assets/styles/auth.css';
 import { post } from '../utils/ApiFetch';
+import Logo from '../components/Logo';
 
 export default function Auth() {
   const [username, setUsername] = useState('');
@@ -42,8 +43,12 @@ export default function Auth() {
   return (
     <div className="box">
       <div className="auth shadow-lg rounded-lg">
+        <Logo
+          className="flex items-center gap-2 justify-center"
+          height={180}
+          width={180}
+        />
         <div className="header">
-          <Typography variant="h3">Sign In</Typography>
           {error && <Typography color="red">{error}</Typography>}
         </div>
         <div className="body">

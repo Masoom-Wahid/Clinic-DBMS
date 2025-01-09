@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChartBarIcon } from '@heroicons/react/16/solid';
 import { UserRole } from '../common/enums/user-role';
 import { CubeIcon } from '@heroicons/react/24/outline';
+import Logo from './Logo';
 
 export function NavbarSimple() {
   const [open, setOpen] = React.useState(0);
@@ -45,10 +46,12 @@ export function NavbarSimple() {
   };
   return (
     <Card className="relative side h-screen shadow-lg p-4">
-      <div className="mb-2 p-4">
-        <Typography variant="h5" color="blue-gray">
-          Dental Clinic
-        </Typography>
+      <div className="p-2">
+        <Logo
+          height={140}
+          width={140}
+          className="flex items-center justify-center"
+        />
       </div>
       <List>
         <Accordion open={open === 1}>
