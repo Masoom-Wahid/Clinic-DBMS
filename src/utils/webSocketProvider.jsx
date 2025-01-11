@@ -12,7 +12,7 @@ export const WebSocketProvider = ({ children }) => {
     if (!websocket) {
       const accessToken = localStorage.getItem('token');
       const ws = new WebSocket(
-        `ws://${import.meta.env.VITE_BACKEND_URL}ws?access_token=${accessToken}`
+        `ws://${import.meta.env.VITE_BACKEND_URL}/ws?access_token=${accessToken}`
       );
       setWebsocket(ws);
     }
