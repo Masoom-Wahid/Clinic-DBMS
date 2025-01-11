@@ -26,7 +26,7 @@ export default function PaymentModal({
   handleOpen,
   treatment,
   onSubmit,
-}: PaymentModalProps) {
+}) {
   const [paymentAmount, setPaymentAmount] = React.useState<number>(0);
   const remainingAmount = treatment?.real_amount ?? 0;
 

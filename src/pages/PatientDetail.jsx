@@ -32,6 +32,8 @@ import {
 
 import { get, del, put, post } from '../utils/ApiFetch';
 import PaymentModel from '../components/payment';
+import ReactDOMServer from 'react-dom/server';
+import PatientBillSlip from '../components/PrintPaymentSlip';
 
 export default function PatientDetail() {
   const navigate = useNavigate();
@@ -412,6 +414,54 @@ export default function PatientDetail() {
       : state === 'warning'
       ? 'red'
       : 'black'; // default color if none of the states match
+  };
+
+  const handlePrint = (bill) => {
+    // Create a new window
+    const printWindow = window.open('', '_blank');
+
+    // Create the content with React component
+    const billContent = ReactDOMServer.renderToString(
+      <PatientBillSlip
+        billData={{
+          billNo: bill.id,
+          patientName: patient.name,
+          patientId: patient.id,
+          paymentMode: 'cash',
+          treatments: [{ name: bill.treatment_name, amount: bill.amount }],
+          receivedBy: 'Sohail',
+          clinicInfo: {
+            name: 'MEDICAL CLINIC NAME',
+            address: '123 Medical Street, City, Country',
+            phone: '(123) 456-7890',
+            logo: '/logo.png',
+          },
+        }}
+      />
+    );
+
+    // Write the complete HTML document
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Bill - ${patient.name} ${patient.last_name}</title>
+          <meta charset="utf-8">
+        </head>
+        <body>
+          ${billContent}
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+
+    // Wait for content to load then print
+    printWindow.onload = function () {
+      printWindow.print();
+      // Optional: Close the window after printing
+      // printWindow.close();
+    };
   };
 
   return (
@@ -893,7 +943,7 @@ export default function PatientDetail() {
                             <td className="p-2">
                               <Button
                                 size="sm"
-                                onClick={() => handleOpenPayment(bill)}
+                                onClick={() => handlePrint(bill)}
                               >
                                 Print
                               </Button>

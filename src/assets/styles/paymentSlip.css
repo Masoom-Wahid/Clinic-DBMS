@@ -1,0 +1,14 @@
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-component,
+  .print-component * {
+    visibility: visible;
+  }
+  .print-component {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}
