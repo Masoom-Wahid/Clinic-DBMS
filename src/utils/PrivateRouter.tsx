@@ -12,8 +12,7 @@ const PrivateRoute = () => {
       if (!decodedToken) {
         return false;
       }
-      const currentTime = Date.now() / 1000;
-      return decodedToken > currentTime;
+      return true;
     } catch (error) {
       return false;
     }
