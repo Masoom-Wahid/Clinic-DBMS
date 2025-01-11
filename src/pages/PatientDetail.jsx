@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import usePagination from "../components/usePagination";
-import Mypagination from "../components/MyPagination";
-import AddTreatmentModal from "../components/Treatment";
-import json from "../utils/DataObjects.json";
+import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import usePagination from '../components/usePagination';
+import Mypagination from '../components/MyPagination';
+import AddTreatmentModal from '../components/Treatment';
+import json from '../utils/DataObjects.json';
 
-import Share from "../components/Share";
+import Share from '../components/Share';
 
-import "../assets/styles/patientdetail.css";
+import '../assets/styles/patientdetail.css';
 import {
   Button,
   Card,
@@ -21,16 +21,17 @@ import {
   DialogHeader,
   DialogBody,
   DialogFooter,
-} from "@material-tailwind/react";
+} from '@material-tailwind/react';
 
 import {
   PencilIcon,
   TrashIcon,
   ShareIcon,
   PlusIcon,
-} from "@heroicons/react/24/outline";
+} from '@heroicons/react/24/outline';
 
-import { get, del, put, post } from "../utils/ApiFetch";
+import { get, del, put, post } from '../utils/ApiFetch';
+import PaymentModel from '../components/payment';
 
 export default function PatientDetail() {
   const navigate = useNavigate();
@@ -39,32 +40,32 @@ export default function PatientDetail() {
   const [treatments, setTreatments] = useState([]);
   const [data, setData] = useState([]);
   const [patient, setPatient] = useState({
-    name: "",
-    last_name: "",
-    addr: "",
-    job: "",
+    name: '',
+    last_name: '',
+    addr: '',
+    job: '',
     age: 0,
-    phone_no: "",
-    gender: "",
-    xray: "",
-    martial_status: "",
+    phone_no: '',
+    gender: '',
+    xray: '',
+    martial_status: '',
     hiv: false,
     hcv: false,
     hbs: false,
     pregnancy: false,
     diabetes: false,
     reflux_esophagitis: false,
-    notes: "",
+    notes: '',
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [formError, setFormError] = useState("");
+  const [formError, setFormError] = useState('');
 
   const [newTreatment, setNewTreatment] = useState({
-    type_of_treatment: "",
-    teeths: "",
-    amount: "0",
-    paid: "0",
+    type_of_treatment: '',
+    teeths: '',
+    amount: '0',
+    paid: '0',
   });
   const [open, setOpen] = useState(false);
   const handleClose = () => setOpen(!open);
@@ -85,19 +86,59 @@ export default function PatientDetail() {
 
   const [billsData, setBillsData] = useState([]);
 
-  const params = useParams("id");
+  const params = useParams('id');
   const patientId = params.id;
+
+  const [openPayment, setOpenPayment] = useState(false);
+  const [selectedTreatment, setSelectedTreatment] = useState(null);
+
+  const handleOpenPayment = (treatment) => {
+    setSelectedTreatment(treatment);
+    setOpenPayment(true);
+  };
+
+  const handlePayment = async (amount) => {
+    const PayResponse = await post(
+      `/api/treatment/${selectedTreatment.id}/pay/`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: { paid: amount },
+      }
+    );
+
+    if (!PayResponse.success) {
+      setFormError(PayResponse.data['wrong amount']);
+      return;
+    }
+
+    // Update treatments list after successful payment
+    const updatedTreatments = treatments.map((treatment) => {
+      if (treatment.id === selectedTreatment.id) {
+        return {
+          ...treatment,
+          real_amount: (
+            parseFloat(treatment.real_amount) - parseFloat(amount)
+          ).toString(),
+        };
+      }
+      return treatment;
+    });
+    setTreatments(updatedTreatments);
+    setOpenPayment(false);
+  };
 
   useEffect(() => {
     const fetchPatientData = async () => {
       const response = await get(`/api/patient/${patientId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
 
       if (!response.success) {
-        setError("Failed to fetch patient data");
+        setError('Failed to fetch patient data');
         setLoading(false);
         return;
       }
@@ -111,7 +152,7 @@ export default function PatientDetail() {
       // Fetch laboratory data for the user
       const labResponse = await get(`/api/lab/`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         params: {
           patientId,
@@ -119,7 +160,7 @@ export default function PatientDetail() {
       });
 
       if (!labResponse.success) {
-        setError("Failed to fetch laboratory data");
+        setError('Failed to fetch laboratory data');
         setLoading(false);
         return;
       }
@@ -129,15 +170,17 @@ export default function PatientDetail() {
 
       const billResponse = await get(`/api/patient/${patientId}/payments/`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
 
       if (!billResponse.success) {
-        setError("Failed to fetch bills data");
+        setError('Failed to fetch bills data');
         setLoading(false);
         return;
       }
+
+      console.log(billResponse.data);
 
       setBillsData(billResponse.data);
 
@@ -154,13 +197,13 @@ export default function PatientDetail() {
     }
     const response = await del(`/api/patient/${patientId}/`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
     if (!response.success) {
       return <div>{response.data}</div>;
     }
-    navigate("/dashboard/patients");
+    navigate('/dashboard/patients');
   };
 
   /**
@@ -192,6 +235,14 @@ export default function PatientDetail() {
     paginate: paginateLab,
   } = usePagination(laboratoryData);
 
+  const {
+    // eslint-disable-next-line no-unused-vars
+    currentItems: _billsData,
+    totalPages: totalPagesBills,
+    currentPage: currentPageBills,
+    paginate: paginateBills,
+  } = usePagination(billsData);
+
   // Check if loading or error states
   if (loading) return <p>Loading patient data...</p>;
   if (error) return <p>{error}</p>;
@@ -202,29 +253,29 @@ export default function PatientDetail() {
    * =============================================
    */
 
-  const Table_head_logs = ["Message"];
+  const Table_head_logs = ['Message'];
   const Table_head_treatment = [
-    "Type of Treatment",
-    "Amount",
-    "Remaining Amount",
-    "Teeths",
-    "Action",
+    'Type of Treatment',
+    'Amount',
+    'Remaining Amount',
+    'Teeths',
+    'Action',
+    'Payment',
   ];
   const Table_head_laboratory = [
-    "Start Date",
-    "End Date",
-    "Labratory Name",
-    "Dental Type",
-    "Status",
-    "Action",
+    'Start Date',
+    'End Date',
+    'Labratory Name',
+    'Dental Type',
+    'Status',
+    'Action',
   ];
   const Table_head_bills = [
-    "Start Date",
-    "End Date",
-    "Labratory Name",
-    "Dental Type",
-    "Status",
-    "Action",
+    'Treatment Name',
+    'Total Amount',
+    'Amount',
+    'Remianing Amount',
+    'Action',
   ];
 
   // Hanlde Treatment Update:
@@ -243,7 +294,7 @@ export default function PatientDetail() {
       setSelectedOps([treatment.type_of_treatment]);
       updateTeethGraph((prevTeethGraph) => {
         const updatedGraph = { ...prevTeethGraph };
-        const selectedTeeths = treatment.teeths.split(",").filter(Boolean);
+        const selectedTeeths = treatment.teeths.split(',').filter(Boolean);
         selectedTeeths.forEach((toothId) => {
           updatedGraph[toothId] = true;
         });
@@ -255,7 +306,7 @@ export default function PatientDetail() {
   const get_teeths_from_graph = (teeths) => {
     return Object.keys(teeths)
       .filter((key) => teeths[key] === true)
-      .join(",");
+      .join(',');
   };
   const handleAddTreatment = () => {
     const new_treatment = {
@@ -265,21 +316,21 @@ export default function PatientDetail() {
     };
 
     if (
-      new_treatment.amount === "0" ||
+      new_treatment.amount === '0' ||
       Math.sign(new_treatment.amount) == -1 ||
-      new_treatment.name === ""
+      new_treatment.name === ''
     ) {
       setFormError(
-        "Please Ensure you have Choosen the Treatement and added the Correct Amount!"
+        'Please Ensure you have Choosen the Treatement and added the Correct Amount!'
       );
     } else {
-      setFormError("");
+      setFormError('');
 
       handleUpdate(new_treatment);
       const updatedTreatments = treatments.map((val) => {
         if (val.id === new_treatment.id) {
           if (!new_treatment.paid) {
-            new_treatment.paid = "0";
+            new_treatment.paid = '0';
           }
           if (
             !(
@@ -290,9 +341,9 @@ export default function PatientDetail() {
             const newAmount = new_treatment.real_amount - new_treatment.paid;
             new_treatment.real_amount = newAmount;
           } else {
-            alert("Invalid Amount ");
+            alert('Invalid Amount ');
           }
-          setFormError("");
+          setFormError('');
           return new_treatment;
         }
         return val;
@@ -311,7 +362,7 @@ export default function PatientDetail() {
     }
     const newResponse = await put(`/api/treatment/${new_treatment.id}/`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       body: new_treatment,
     });
@@ -320,29 +371,29 @@ export default function PatientDetail() {
       return;
     }
 
-    if (new_treatment.paid != "" && new_treatment.paid != "0") {
+    if (new_treatment.paid != '' && new_treatment.paid != '0') {
       const PayResponse = await post(
         `/api/treatment/${new_treatment.id}/pay/`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
           body: { paid: new_treatment.paid },
         }
       );
 
       if (!PayResponse.success) {
-        setFormError(PayResponse.data["wrong amount"]);
+        setFormError(PayResponse.data['wrong amount']);
         setOpen(true);
 
         return;
       }
-      setFormError("");
+      setFormError('');
     }
   };
 
   const handleAddLab = () => {
-    navigate("/dashboard/dental-lab/add", {
+    navigate('/dashboard/dental-lab/add', {
       state: {
         patientId: patientId,
         patientName: `${patient.name} ${patient.last_name}`,
@@ -352,15 +403,15 @@ export default function PatientDetail() {
   };
 
   const getColor = (state) => {
-    return state === "waiting"
-      ? "orange"
-      : state === "pending"
-      ? "orange"
-      : state === "done"
-      ? "green"
-      : state === "warning"
-      ? "red"
-      : "black"; // default color if none of the states match
+    return state === 'waiting'
+      ? 'orange'
+      : state === 'pending'
+      ? 'orange'
+      : state === 'done'
+      ? 'green'
+      : state === 'warning'
+      ? 'red'
+      : 'black'; // default color if none of the states match
   };
 
   return (
@@ -375,16 +426,16 @@ export default function PatientDetail() {
             to={`/dashboard/patients/edit/${state?.id}`}
             state={{ data: data }}
           >
-            <PencilIcon style={{ height: "20px" }} />
+            <PencilIcon style={{ height: '20px' }} />
           </Link>
           <Link onClick={() => setOpenDeleteDialog(true)}>
-            <TrashIcon style={{ height: "20px" }} />
+            <TrashIcon style={{ height: '20px' }} />
           </Link>
 
           <ShareIcon
             className="cursor-pointer"
             onClick={handleOpenShare}
-            style={{ height: "20px" }}
+            style={{ height: '20px' }}
           />
         </div>
 
@@ -503,7 +554,7 @@ export default function PatientDetail() {
                     <table className="w-full min-w-max table-auto text-left">
                       <thead>
                         <tr>
-                          {Table_head_logs.filter((head) => head != "id").map(
+                          {Table_head_logs.filter((head) => head != 'id').map(
                             (head) => (
                               <th
                                 key={head}
@@ -557,7 +608,7 @@ export default function PatientDetail() {
                       <thead>
                         <tr>
                           {Table_head_treatment.filter(
-                            (head) => head != "id"
+                            (head) => head != 'id'
                           ).map((head) => (
                             <th
                               key={head}
@@ -616,9 +667,17 @@ export default function PatientDetail() {
                                 {treat.teeths}
                               </Typography>
                             </td>
-                            <td className="p-4">
+                            <td>
                               <Button onClick={() => handleOpen(treat)}>
                                 Edit
+                              </Button>
+                            </td>
+                            <td className="p-2">
+                              <Button
+                                variant="outlined"
+                                onClick={() => handleOpenPayment(treat)}
+                              >
+                                Pay
                               </Button>
                             </td>
                           </tr>
@@ -634,7 +693,7 @@ export default function PatientDetail() {
                     />
                   </div>
                   <AddTreatmentModal
-                    mode={"edit"}
+                    mode={'edit'}
                     open={open}
                     handleOpen={handleClose}
                     newTreatment={newTreatment}
@@ -646,6 +705,7 @@ export default function PatientDetail() {
                     selectTeeth={selectTeeth}
                     handleAddTreatment={handleAddTreatment}
                     error={formError}
+                    showAmountPaid={false}
                   />
                 </div>
               </TabPanel>
@@ -765,7 +825,7 @@ export default function PatientDetail() {
                     <table className="w-full min-w-max table-auto text-left">
                       <thead>
                         <tr>
-                          {Table_head_logs.filter((head) => head != "id").map(
+                          {Table_head_bills.filter((head) => head != 'id').map(
                             (head) => (
                               <th
                                 key={head}
@@ -784,7 +844,7 @@ export default function PatientDetail() {
                         </tr>
                       </thead>
                       <tbody>
-                        {logsItems.map((log, index) => (
+                        {billsData.map((bill, index) => (
                           <tr
                             key={index + 1}
                             className="even:bg-blue-gray-50/50"
@@ -795,8 +855,48 @@ export default function PatientDetail() {
                                 color="blue-gray"
                                 className="font-normal"
                               >
-                                {log.msg}
+                                {bill.treatment_name}
                               </Typography>
+                            </td>
+                            <td className="p-4">
+                              <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                              >
+                                {bill.total_amount}
+                              </Typography>
+                            </td>
+                            <td className="p-2">
+                              <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-normal"
+                              >
+                                {bill.amount}
+                              </Typography>
+                            </td>
+                            <td
+                              style={{
+                                width: '200px',
+                                paddingLeft: '50px',
+                              }}
+                            >
+                              <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="font-norma"
+                              >
+                                {bill.remaining_amount}
+                              </Typography>
+                            </td>
+                            <td className="p-2">
+                              <Button
+                                size="sm"
+                                onClick={() => handleOpenPayment(bill)}
+                              >
+                                Print
+                              </Button>
                             </td>
                           </tr>
                         ))}
@@ -805,9 +905,9 @@ export default function PatientDetail() {
                   </Card>
                   <div className="table-pag">
                     <Mypagination
-                      totalPages={totalPages}
-                      currentPage={currentPage}
-                      paginate={paginate}
+                      totalPages={totalPagesBills}
+                      currentPage={currentPageBills}
+                      paginate={paginateBills}
                     />
                   </div>
                 </div>
@@ -839,6 +939,16 @@ export default function PatientDetail() {
           </Button>
         </DialogFooter>
       </Dialog>
+      <PaymentModel
+        open={openPayment}
+        handleOpen={() => setOpenPayment(false)}
+        onSubmit={handlePayment}
+        treatment={{
+          amount: selectedTreatment?.amount,
+          real_amount: selectedTreatment?.real_amount,
+          type_of_treatment: selectedTreatment?.type_of_treatment,
+        }}
+      />
     </div>
   );
 }

@@ -26,6 +26,7 @@ export default function AddTreatmentModal({
   handleAddTreatment,
   showOperations = true,
   error,
+  showAmountPaid = true,
 }) {
   return (
     <Dialog size="md" open={open} handler={handleOpen} className="dialog p-4">
@@ -82,18 +83,22 @@ export default function AddTreatmentModal({
               }
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
-            <label className="block text-sm font-medium text-gray-700">
-              Amount Paid
-            </label>
-            <input
-              type="number"
-              name="treatmentPaid"
-              value={newTreatment.paid}
-              onChange={(e) =>
-                setNewTreatment({ ...newTreatment, paid: e.target.value })
-              }
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
+            {showAmountPaid && (
+              <>
+                <label className="block text-sm font-medium text-gray-700">
+                  Amount Paid
+                </label>
+                <input
+                  type="number"
+                  name="treatmentPaid"
+                  value={newTreatment.paid}
+                  onChange={(e) =>
+                    setNewTreatment({ ...newTreatment, paid: e.target.value })
+                  }
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </>
+            )}
           </div>
         )}
       </DialogBody>
