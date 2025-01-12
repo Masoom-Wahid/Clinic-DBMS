@@ -13,6 +13,8 @@ export default function AddClinicLab({ isEditing = false }) {
   const data = useMemo(() => state?.data || {}, [state]);
   const patientData = state;
 
+  console.log(data);
+
   const [formData, setFormData] = useState({
     name: patientData?.patientName || '',
     teeths: '',
@@ -131,16 +133,12 @@ export default function AddClinicLab({ isEditing = false }) {
               label="Name"
               color="teal"
               type="text"
-              required={!patientData?.patientId}
+              required={!patientData?.patientId && !data?.patient}
               value={formData.name}
               onChange={handleChange}
-              disabled={patientData?.patientId ?? data.patient}
+              disabled={patientData?.patientId || data?.patient}
               className={
-                patientData?.patientId
-                  ? 'opacity-70'
-                  : data.patient
-                  ? 'opacity-70'
-                  : ''
+                patientData?.patientId || data?.patient ? 'opacity-70' : ''
               }
             />
 

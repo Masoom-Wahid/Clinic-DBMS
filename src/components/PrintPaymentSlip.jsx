@@ -1,186 +1,209 @@
-const PatientBillSlip = ({
-  billData = {
-    billNo: '',
+import PropTypes from 'prop-types';
+
+const PayslipComponent = ({
+  username = '',
+  payslipDetails = {
+    payslipId: '',
     patientName: '',
-    patientId: '',
-    paymentMode: '',
-    treatments: [],
-    receivedBy: '',
-    clinicInfo: {
-      name: 'MEDICAL CLINIC NAME',
-      address: '123 Medical Street, City, Country',
-      phone: '(123) 456-7890',
-      logo: '/logo.png',
-    },
+    patientLastName: '',
+    operationName: '',
+    treatmentCost: 0,
+    moneyPaid: 0,
+    remainingMoney: 0,
+    date: '',
+    printDate: '',
+    userSignature: '',
   },
 }) => {
-  const currentDate = new Date().toLocaleDateString();
-
-  // Calculate total amount
-  const totalAmount = billData.treatments?.reduce(
-    (sum, treatment) => sum + treatment.amount,
-    0
-  );
+  const styles = {
+    container: {
+      maxWidth: '800px',
+      margin: '0 auto',
+      padding: '16px',
+      backgroundColor: 'white',
+      fontFamily: 'Arial, sans-serif',
+    },
+    header: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      marginBottom: '24px',
+    },
+    logoContainer: {
+      width: '64px',
+      height: '64px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    logo: {
+      width: '48px',
+      height: '48px',
+    },
+    logoPlaceholder: {
+      width: '48px',
+      height: '48px',
+      borderRadius: '50%',
+      border: '2px solid #d1d5db',
+    },
+    headerCenter: {
+      flex: 1,
+      textAlign: 'center',
+    },
+    clinicName: {
+      fontSize: '20px',
+      fontWeight: 'bold',
+      margin: '0',
+    },
+    subtitle: {
+      fontSize: '14px',
+      fontWeight: '600',
+      marginTop: '4px',
+    },
+    headerRight: {
+      fontSize: '14px',
+    },
+    mainContent: {
+      border: '2px solid #d1d5db',
+    },
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse',
+    },
+    cell: {
+      border: '2px solid #d1d5db',
+      padding: '12px',
+      fontSize: '14px',
+    },
+    labelCell: {
+      fontWeight: '600',
+      width: '33%',
+    },
+    footer: {
+      marginTop: '32px',
+      padding: '16px',
+      borderTop: '2px solid #d1d5db',
+    },
+    footerContent: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-end',
+    },
+    signatureLine: {
+      width: '192px',
+      borderTop: '2px solid #9ca3af',
+      marginTop: '16px',
+    },
+    signatureText: {
+      fontSize: '14px',
+      marginTop: '4px',
+    },
+    notice: {
+      marginTop: '16px',
+      fontSize: '14px',
+      fontStyle: 'italic',
+      textAlign: 'center',
+      color: '#4b5563',
+    },
+  };
 
   return (
-    <div
-      style={{
-        fontFamily: 'Arial, sans-serif',
-        padding: '30px',
-        border: '2px solid #333',
-        width: '21cm',
-        margin: '0 auto',
-        backgroundColor: '#fff',
-        boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-      }}
-    >
-      <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-        <img
-          src={billData.clinicInfo.logo}
-          alt="Clinic Logo"
-          style={{ width: '150px', marginBottom: '15px' }}
-        />
-        <h1
-          style={{
-            margin: '0',
-            color: '#2c3e50',
-            fontSize: '24px',
-          }}
-        >
-          {billData.clinicInfo.name}
-        </h1>
-        <p
-          style={{
-            color: '#7f8c8d',
-            margin: '5px 0',
-          }}
-        >
-          {billData.clinicInfo.address}
-        </p>
-        <p
-          style={{
-            color: '#7f8c8d',
-            margin: '5px 0',
-          }}
-        >
-          Tel: {billData.clinicInfo.phone}
-        </p>
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: '30px',
-          padding: '10px',
-          backgroundColor: '#f8f9fa',
-        }}
-      >
-        <div>
-          <p>
-            <strong>Bill No:</strong> {billData.billNo}
-          </p>
-          <p>
-            <strong>Patient Name:</strong> {billData.patientName}
-          </p>
-          <p>
-            <strong>Patient ID:</strong> {billData.patientId}
-          </p>
-        </div>
-        <div>
-          <p>
-            <strong>Date:</strong> {currentDate}
-          </p>
-          <p>
-            <strong>Payment Mode:</strong> {billData.paymentMode}
-          </p>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: '30px' }}>
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            marginBottom: '20px',
-          }}
-        >
-          <thead>
-            <tr style={{ backgroundColor: '#2c3e50', color: 'white' }}>
-              <th style={tableHeaderStyle}>Treatment</th>
-              <th style={tableHeaderStyle}>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {billData.treatments?.map((treatment, index) => (
-              <tr key={index}>
-                <td style={tableCellStyle}>{treatment.name}</td>
-                <td style={tableCellStyle}>${treatment.amount.toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr style={{ fontWeight: 'bold' }}>
-              <td style={tableCellStyle}>Total Amount</td>
-              <td style={tableCellStyle}>${totalAmount.toFixed(2)}</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginTop: '50px',
-          paddingTop: '20px',
-          borderTop: '1px solid #eee',
-        }}
-      >
-        <div>
-          <p>
-            <strong>Received By:</strong> {billData.receivedBy}
-          </p>
-        </div>
-        <div>
-          <p
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <div style={styles.logoContainer}>
+          <img
+            src="/logo.png"
+            alt="Clinic Logo"
             style={{
-              borderTop: '1px solid #000',
-              paddingTop: '5px',
-              width: '200px',
+              ...styles.logo,
             }}
-          >
-            Authorized Signature
-          </p>
+          />
+        </div>
+        <div style={styles.headerCenter}>
+          <h1 style={styles.clinicName}>
+            {payslipDetails.clinicName || 'Wahid Dental Clinic'}
+          </h1>
+          <p style={styles.subtitle}>Payment Bill Slip</p>
+        </div>
+        <div style={styles.headerRight}>
+          <p>Print date: {payslipDetails.printDate}</p>
+          <p>Payment Id #: {payslipDetails.payslipId}</p>
         </div>
       </div>
 
-      <div
-        style={{
-          textAlign: 'center',
-          marginTop: '30px',
-          padding: '20px',
-          borderTop: '1px solid #eee',
-          color: '#7f8c8d',
-          fontSize: '14px',
-        }}
-      >
-        <p>Thank you for choosing our services!</p>
-        <p>This is a computer-generated bill, no signature required.</p>
+      <div style={styles.mainContent}>
+        <table style={styles.table}>
+          <tbody>
+            <tr>
+              <td style={{ ...styles.cell, ...styles.labelCell }}>
+                Patient Name:
+              </td>
+              <td style={styles.cell}>
+                {payslipDetails.patientName} {payslipDetails.patientLastName}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ ...styles.cell, ...styles.labelCell }}>
+                Treatment:
+              </td>
+              <td style={styles.cell}>{payslipDetails.operationName}</td>
+            </tr>
+            <tr>
+              <td style={{ ...styles.cell, ...styles.labelCell }}>
+                Treatment Cost:
+              </td>
+              <td style={styles.cell}>AFN {payslipDetails.treatmentCost}</td>
+            </tr>
+            <tr>
+              <td style={{ ...styles.cell, ...styles.labelCell }}>
+                Amount Paid:
+              </td>
+              <td style={styles.cell}>AFN {payslipDetails.moneyPaid}</td>
+            </tr>
+            <tr>
+              <td style={{ ...styles.cell, ...styles.labelCell }}>
+                Remaining Amount:
+              </td>
+              <td style={styles.cell}>AFN {payslipDetails.remainingMoney}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style={styles.footer}>
+          <div style={styles.footerContent}>
+            <div>
+              <p style={{ marginBottom: '16px' }}>Issued By: {username}</p>
+              <div style={styles.signatureLine}></div>
+              <p style={styles.signatureText}>Staff Signature</p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ marginBottom: '16px' }}>
+                Date: {payslipDetails.date}
+              </p>
+              <div style={styles.signatureLine}></div>
+              <p style={styles.signatureText}>Date & Stamp</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={styles.notice}>
+        The fee is Neither refundable Nor Transferable
       </div>
     </div>
   );
 };
 
-const tableHeaderStyle = {
-  padding: '12px',
-  textAlign: 'left',
-  borderBottom: '2px solid #2c3e50',
+PayslipComponent.propTypes = {
+  payslipDetails: PropTypes.shape({
+    patientName: PropTypes.string.isRequired,
+    operationName: PropTypes.string.isRequired,
+    treatmentCost: PropTypes.number.isRequired,
+    moneyPaid: PropTypes.number.isRequired,
+    remainingMoney: PropTypes.number.isRequired,
+    date: PropTypes.string.isRequired,
+  }).isRequired,
+  username: PropTypes.string.isRequired,
 };
 
-const tableCellStyle = {
-  padding: '12px',
-  borderBottom: '1px solid #ddd',
-};
-
-export default PatientBillSlip;
+export default PayslipComponent;

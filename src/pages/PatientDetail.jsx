@@ -32,8 +32,9 @@ import {
 
 import { get, del, put, post } from '../utils/ApiFetch';
 import PaymentModel from '../components/payment';
-import ReactDOMServer from 'react-dom/server';
-import PatientBillSlip from '../components/PrintPaymentSlip';
+import ReactDOM from 'react-dom/client';
+
+import PayslipComponent from '../components/PrintPaymentSlip';
 
 export default function PatientDetail() {
   const navigate = useNavigate();
@@ -181,8 +182,6 @@ export default function PatientDetail() {
         setLoading(false);
         return;
       }
-
-      console.log(billResponse.data);
 
       setBillsData(billResponse.data);
 
@@ -417,51 +416,54 @@ export default function PatientDetail() {
   };
 
   const handlePrint = (bill) => {
-    // Create a new window
     const printWindow = window.open('', '_blank');
 
-    // Create the content with React component
-    const billContent = ReactDOMServer.renderToString(
-      <PatientBillSlip
-        billData={{
-          billNo: bill.id,
-          patientName: patient.name,
-          patientId: patient.id,
-          paymentMode: 'cash',
-          treatments: [{ name: bill.treatment_name, amount: bill.amount }],
-          receivedBy: 'Sohail',
-          clinicInfo: {
-            name: 'MEDICAL CLINIC NAME',
-            address: '123 Medical Street, City, Country',
-            phone: '(123) 456-7890',
-            logo: '/logo.png',
-          },
-        }}
-      />
-    );
+    const style = printWindow.document.createElement('style');
+    style.textContent = `
+      @page {
+        size: 200mm 150mm; /* Wider width, shorter height */
+        margin: 0;
+      }
+      @media print {
+        body {
+          margin: 0;
+          padding: 8mm;
+          width: 210mm;  /* Match page width */
+          height: 150mm; /* Match page height */
+        }
+      }
+    `;
+    printWindow.document.head.appendChild(style);
 
-    // Write the complete HTML document
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Bill - ${patient.name} ${patient.last_name}</title>
-          <meta charset="utf-8">
-        </head>
-        <body>
-          ${billContent}
-        </body>
-      </html>
-    `);
+    // Render the PayslipComponent into the new window
+    if (printWindow) {
+      const root = printWindow.document.createElement('div');
+      printWindow.document.body.appendChild(root);
 
-    printWindow.document.close();
+      const reactRoot = ReactDOM.createRoot(root);
+      reactRoot.render(
+        <PayslipComponent
+          username={localStorage.getItem('user')}
+          payslipDetails={{
+            payslipId: bill.id,
+            patientName: patient.name,
+            patientLastName: patient.last_name,
+            operationName: bill.treatment_name,
+            treatmentCost: bill.total_amount,
+            moneyPaid: bill.amount,
+            remainingMoney: bill.remaining_amount,
+            printDate: new Date().toISOString().split('T')[0],
+            date: new Date(bill.created_at).toISOString().split('T')[0],
+          }}
+        />
+      );
 
-    // Wait for content to load then print
-    printWindow.onload = function () {
-      printWindow.print();
-      // Optional: Close the window after printing
-      // printWindow.close();
-    };
+      // Trigger print after content is loaded
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 100);
+    }
   };
 
   return (
