@@ -431,6 +431,10 @@ export default function PatientDetail() {
           width: 210mm;  /* Match page width */
           height: 150mm; /* Match page height */
         }
+           img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
       }
     `;
     printWindow.document.head.appendChild(style);

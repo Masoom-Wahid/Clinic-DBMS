@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 const PayslipComponent = ({
@@ -15,6 +16,25 @@ const PayslipComponent = ({
     userSignature: '',
   },
 }) => {
+  const [logoUrl, setLogoUrl] = useState(null);
+
+  useEffect(() => {
+    // Convert image to base64
+    const convertImageToBase64 = async () => {
+      try {
+        const response = await fetch('/logo.png');
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => setLogoUrl(reader.result);
+        reader.readAsDataURL(blob);
+      } catch (error) {
+        console.error('Error loading logo:', error);
+      }
+    };
+
+    convertImageToBase64();
+  }, []);
+
   const styles = {
     container: {
       maxWidth: '800px',
@@ -37,8 +57,8 @@ const PayslipComponent = ({
       justifyContent: 'center',
     },
     logo: {
-      width: '48px',
-      height: '48px',
+      width: '85px',
+      height: '85px',
     },
     logoPlaceholder: {
       width: '48px',
@@ -108,16 +128,20 @@ const PayslipComponent = ({
   };
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="print-component">
       <div style={styles.header}>
         <div style={styles.logoContainer}>
-          <img
-            src="/logo.png"
-            alt="Clinic Logo"
-            style={{
-              ...styles.logo,
-            }}
-          />
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt="Clinic Logo"
+              style={{
+                ...styles.logo,
+                WebkitPrintColorAdjust: 'exact',
+                printColorAdjust: 'exact',
+              }}
+            />
+          )}
         </div>
         <div style={styles.headerCenter}>
           <h1 style={styles.clinicName}>
