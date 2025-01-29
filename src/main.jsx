@@ -83,14 +83,18 @@ const router = createBrowserRouter([
             element: <AddClinicLab isEditing={true} />,
           },
           {
+            path: '/dashboard/patients',
+            element: <Patient />,
+          },
+          {
+            path: '/dashboard/patients/:id',
+            element: <PatientDetail />,
+          },
+          {
             element: (
               <RoleBasedGuard allowedRoles={[UserRole.Staff, UserRole.Admin]} />
             ),
             children: [
-              {
-                path: '/dashboard/patients',
-                element: <Patient />,
-              },
               {
                 path: '/dashboard/patients/add',
                 element: <AddPatient />,
@@ -99,10 +103,7 @@ const router = createBrowserRouter([
                 path: '/dashboard/patients/edit/:id',
                 element: <AddPatient isEditing={true} />,
               },
-              {
-                path: '/dashboard/patients/:id',
-                element: <PatientDetail />,
-              },
+
               {
                 path: '/dashboard/daily',
                 element: <Daily />,

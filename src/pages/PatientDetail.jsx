@@ -35,6 +35,7 @@ import PaymentModel from '../components/payment';
 import ReactDOM from 'react-dom/client';
 
 import PayslipComponent from '../components/PrintPaymentSlip';
+import { UserRole } from '../common/enums/user-role';
 
 export default function PatientDetail() {
   const navigate = useNavigate();
@@ -99,6 +100,9 @@ export default function PatientDetail() {
     setSelectedTreatment(treatment);
     setOpenPayment(true);
   };
+
+  const role = localStorage.getItem('role');
+  const isDoctor = role === UserRole.Doctor;
 
   const handlePayment = async (amount) => {
     const PayResponse = await post(
@@ -403,6 +407,20 @@ export default function PatientDetail() {
     });
   };
 
+  const handleDeleteLab = async (id) => {
+    const response = await del(`/api/lab/${id}/`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (response.success) {
+      setLaboratoryData((prev) => prev.filter((a) => a.id !== id));
+    } else {
+      console.error('Could not delete the lab');
+    }
+  };
+
   const getColor = (state) => {
     return state === 'waiting'
       ? 'orange'
@@ -478,21 +496,43 @@ export default function PatientDetail() {
           <h2 className="text-3xl font-bold text-gray-800 mb-6">
             Patient {patientId} Details
           </h2>
-          <Link
-            to={`/dashboard/patients/edit/${state?.id}`}
-            state={{ data: data }}
+          <Button
+            variant="text"
+            size="sm"
+            disabled={isDoctor}
+            className="p-1 hover:bg-transparent"
           >
-            <PencilIcon style={{ height: '20px' }} />
-          </Link>
-          <Link onClick={() => setOpenDeleteDialog(true)}>
-            <TrashIcon style={{ height: '20px' }} />
-          </Link>
+            <Link
+              to={`/dashboard/patients/edit/${state?.id}`}
+              state={{ data: data }}
+            >
+              <PencilIcon style={{ height: '20px' }} />
+            </Link>
+          </Button>
 
-          <ShareIcon
-            className="cursor-pointer"
-            onClick={handleOpenShare}
-            style={{ height: '20px' }}
-          />
+          <Button
+            variant="text"
+            size="sm"
+            disabled={isDoctor}
+            className="p-1 hover:bg-transparent"
+          >
+            <Link onClick={() => setOpenDeleteDialog(true)}>
+              <TrashIcon style={{ height: '20px' }} />
+            </Link>
+          </Button>
+
+          <Button
+            variant="text"
+            size="sm"
+            disabled={isDoctor}
+            className="p-1 hover:bg-transparent"
+          >
+            <ShareIcon
+              className="cursor-pointer"
+              onClick={handleOpenShare}
+              style={{ height: '20px' }}
+            />
+          </Button>
         </div>
 
         {openShare && (
@@ -724,7 +764,10 @@ export default function PatientDetail() {
                               </Typography>
                             </td>
                             <td>
-                              <Button onClick={() => handleOpen(treat)}>
+                              <Button
+                                onClick={() => handleOpen(treat)}
+                                disabled={isDoctor}
+                              >
                                 Edit
                               </Button>
                             </td>
@@ -732,6 +775,7 @@ export default function PatientDetail() {
                               <Button
                                 variant="outlined"
                                 onClick={() => handleOpenPayment(treat)}
+                                disabled={isDoctor}
                               >
                                 Pay
                               </Button>
@@ -857,9 +901,16 @@ export default function PatientDetail() {
                                   patientName: `${patient.name} ${patient.last_name}`,
                                   patientPhoneNumber: patient.phone_no,
                                 }}
+                                style={{ marginRight: '20px' }}
                               >
                                 <Button>Edit</Button>
                               </Link>
+                              <Button
+                                variant="outlined"
+                                onClick={() => handleDeleteLab(lab.id)}
+                              >
+                                Delete
+                              </Button>
                             </td>
                           </tr>
                         ))}
@@ -950,6 +1001,7 @@ export default function PatientDetail() {
                               <Button
                                 size="sm"
                                 onClick={() => handlePrint(bill)}
+                                disabled={isDoctor}
                               >
                                 Print
                               </Button>

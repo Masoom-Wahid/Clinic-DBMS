@@ -1,13 +1,11 @@
-import { Button, Card, Typography } from '@material-tailwind/react';
-import { PlusIcon } from '@heroicons/react/16/solid';
 import { useState, useEffect } from 'react';
 
-import { get, del } from '../utils/ApiFetch';
+import { get } from '../utils/ApiFetch';
 
 import '../assets/styles/patientPage.css';
 
-import { Link } from 'react-router-dom';
 import Mypagination from '../components/MyPagination';
+import { Card, Typography } from '@material-tailwind/react';
 
 export default function ClinicLab() {
   const [labs, setLabs] = useState([]);
@@ -52,20 +50,6 @@ export default function ClinicLab() {
     );
   }
 
-  const handleDelete = async (id) => {
-    const response = await del(`/api/lab/${id}/`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-
-    if (response.success) {
-      setLabs((prev) => prev.filter((a) => a.id !== id));
-    } else {
-      console.error('Could not delete the lab');
-    }
-  };
-
   const getColor = (state) => {
     return state === 'waiting'
       ? 'orange'
@@ -82,13 +66,6 @@ export default function ClinicLab() {
     <div>
       <div className="flex-col table patient-table">
         <div className="table-head">
-          <Link to="/dashboard/dental-lab/add">
-            <Button className="patient-btn">
-              <PlusIcon style={{ height: '18px' }} />
-              Add Clinic Lab Orders
-            </Button>
-          </Link>
-
           <h1 className="head-text">Clinic Lab Orders</h1>
         </div>
         <div className="table-body">
@@ -161,15 +138,6 @@ export default function ClinicLab() {
                         Phone Number
                       </Typography>
                     </th>
-                    <th className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal leading-none opacity-70"
-                      >
-                        Action
-                      </Typography>
-                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -238,30 +206,6 @@ export default function ClinicLab() {
                         >
                           {lab.phone_no}
                         </Typography>
-                      </td>
-
-                      <td>
-                        <Button
-                          variant="text"
-                          size="sm"
-                          className="font-medium"
-                          onClick={() => handleDelete(lab.id)}
-                        >
-                          Delete
-                        </Button>
-
-                        <Link
-                          to={`/dashboard/dental-lab/edit/${lab.id}`}
-                          state={{ data: lab }}
-                        >
-                          <Button
-                            variant="text"
-                            size="sm"
-                            className="font-medium"
-                          >
-                            Edit
-                          </Button>
-                        </Link>
                       </td>
                     </tr>
                   ))}

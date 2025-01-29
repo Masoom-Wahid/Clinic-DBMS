@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import '../assets/styles/auth.css';
 import { post } from '../utils/ApiFetch';
 import Logo from '../components/Logo';
+import { jwtDecode } from 'jwt-decode';
 
 export default function Auth() {
   const [username, setUsername] = useState('');
@@ -35,6 +36,8 @@ export default function Auth() {
       if (response.data?.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', username); // Store JWT
+        const decodedRole = jwtDecode(response.data.token).role;
+        localStorage.setItem('role', decodedRole);
         navigate('/dashboard'); // Redirect to home or dashboard after login
       }
       setLoading(false);

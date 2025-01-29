@@ -13,8 +13,6 @@ export default function AddClinicLab({ isEditing = false }) {
   const data = useMemo(() => state?.data || {}, [state]);
   const patientData = state;
 
-  console.log(data);
-
   const [formData, setFormData] = useState({
     name: patientData?.patientName || '',
     teeths: '',

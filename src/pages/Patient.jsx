@@ -8,6 +8,7 @@ import { get } from '../utils/ApiFetch';
 import '../assets/styles/patientPage.css';
 import { Link } from 'react-router-dom';
 import Mypagination from '../components/MyPagination';
+import { UserRole } from '../common/enums/user-role';
 
 export default function Patient() {
   const [patients, setPatients] = useState([]);
@@ -22,6 +23,9 @@ export default function Patient() {
 
   // Calculate total pages
   const totalPages = Math.ceil(countP / 20);
+
+  const role = localStorage.getItem('role');
+  const isDoctor = role === UserRole.Doctor;
 
   // Function to change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -141,12 +145,14 @@ export default function Patient() {
       />
       <div className="flex-col table patient-table">
         <div className="table-head">
-          <Link to="/dashboard/patients/add">
-            <Button className="patient-btn">
-              <PlusIcon style={{ height: '18px' }} />
-              Add Patient
-            </Button>
-          </Link>
+          {!isDoctor && (
+            <Link to="/dashboard/patients/add">
+              <Button className="patient-btn">
+                <PlusIcon style={{ height: '18px' }} />
+                Add Patient
+              </Button>
+            </Link>
+          )}
           <h1 className="head-text">All Patients</h1>
         </div>
         <div className="table-body">

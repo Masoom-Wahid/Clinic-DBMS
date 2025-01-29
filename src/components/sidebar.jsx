@@ -71,30 +71,25 @@ export function NavbarSimple() {
             </ListItem>
           </Link>
         </Accordion>
-        {(user.role === UserRole.Staff || user.role === UserRole.Admin) && (
-          <>
-            <Accordion open={open === 2}>
-              <Link to="/dashboard/patients">
-                <ListItem className="p-0" selected={open === 2}>
-                  <AccordionHeader
-                    onClick={() => handleOpen(2)}
-                    className="border-b-0 p-3"
-                  >
-                    <ListItemPrefix>
-                      <ShoppingBagIcon className="h-5 w-5" />
-                    </ListItemPrefix>
-                    <Typography
-                      color="blue-gray"
-                      className="mr-auto font-normal"
-                    >
-                      Patient
-                    </Typography>
-                  </AccordionHeader>
-                </ListItem>
-              </Link>
-            </Accordion>
-          </>
-        )}
+
+        <Accordion open={open === 2}>
+          <Link to="/dashboard/patients">
+            <ListItem className="p-0" selected={open === 2}>
+              <AccordionHeader
+                onClick={() => handleOpen(2)}
+                className="border-b-0 p-3"
+              >
+                <ListItemPrefix>
+                  <ShoppingBagIcon className="h-5 w-5" />
+                </ListItemPrefix>
+                <Typography color="blue-gray" className="mr-auto font-normal">
+                  Patient
+                </Typography>
+              </AccordionHeader>
+            </ListItem>
+          </Link>
+        </Accordion>
+
         <Accordion open={open === 3}>
           <Link to="/dashboard/appointments">
             <ListItem className="p-0" selected={open === 3}>
@@ -169,11 +164,11 @@ export function NavbarSimple() {
         )}
         {user.role === UserRole.Admin && (
           <>
-            <Accordion open={open === 8}>
+            <Accordion open={open === 10}>
               <Link to="/dashboard/tasks">
-                <ListItem className="p-0" selected={open === 8}>
+                <ListItem className="p-0" selected={open === 10}>
                   <AccordionHeader
-                    onClick={() => handleOpen(8)}
+                    onClick={() => handleOpen(10)}
                     className="border-b-0 p-3"
                   >
                     <ListItemPrefix>
@@ -231,11 +226,11 @@ export function NavbarSimple() {
             </Accordion>
           </>
         )}
-        <Accordion open={open === 7}>
+        <Accordion open={open === 8}>
           <Link to="/dashboard/dental-lab">
-            <ListItem className="p-0" selected={open === 7}>
+            <ListItem className="p-0" selected={open === 8}>
               <AccordionHeader
-                onClick={() => handleOpen(7)}
+                onClick={() => handleOpen(8)}
                 className="border-b-0 p-3"
               >
                 <ListItemPrefix>
