@@ -1,14 +1,12 @@
 pipeline {
     agent any
     environment {
-        NODEJS_HOME = tool name: 'Node16', type: 'nodejs' 
-        PATH = "${NODEJS_HOME}/bin:${env.PATH}"
+        NODE_VERSION = '16'
     }
     stages {
         stage('Checkout') {
             steps {
-                // Clone the repository
-                git branch: 'main', url: 'https://github.com/Masoom-Wahid/Clinic-DBMS.git'
+                git branch: 'main', url: 'https://github.com/Masoom-Wahid/Clinic-DBMS/tree/jenkins'
             }
         }
         stage('Install Dependencies') {
@@ -18,33 +16,27 @@ pipeline {
         }
         stage('Run Tests') {
             steps {
-                sh sleep 5
-                sh 'echo test_finsiehd'
+                sh 'sleep 10'
             }
         }
         stage('Build') {
             steps {
-                // Build the Vite app for production
                 sh 'npm run build'
             }
         }
         stage('Deploy') {
             steps {
-                sh 'sleep 10'
-                sh 'echo finished_deploy'
+                sh 'sleep 20'
+                echo 'Deploying application...'
             }
         }
     }
     post {
-        always {
-            echo 'Pipeline completed!'
-        }
         success {
-            echo 'Build and deployment successful!'
-            archiveArtifacts artifacts: 'dist/**', allowEmptyArchive: true
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Check the logs for details.'
+            echo 'Pipeline failed.'
         }
     }
 }
