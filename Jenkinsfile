@@ -3,14 +3,14 @@ pipeline {
     environment {
         NODE_VERSION = '16'
     }
-    stages {
-        checkout scmGit(
+    checkout scmGit(
             branches: [[name: '*/jenkins']],
              extensions: [], 
              userRemoteConfigs: 
              [[credentialsId: 'b0921c1f-f2bb-4be9-adae-2c638e42305b', url: 'https://github.com/Masoom-Wahid/Clinic-DBMS.git']]
-        )
-        
+    )
+    stages {
+
         stage('Install Dependencies') {
             steps {
                 sh 'npm install'
