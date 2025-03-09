@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Masoom-Wahid/Clinic-DBMS.git'
+                git branch: 'main', url: 'https://github.com/Masoom-Wahid/Clinic-DBMS/'
             }
         }
         stage('Install Dependencies') {
