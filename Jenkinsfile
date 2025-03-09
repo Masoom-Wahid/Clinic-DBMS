@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        NODE_VERSION = '20' // Updated to 20
+        NODE_VERSION = '20' // Informational
     }
     stages {
         stage('Checkout') {
@@ -18,7 +18,7 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
-                nodejs(nodeJSInstallationName: 'Node 20') { // Match the name from Global Tools
+                nodejs(nodeJSInstallationName: 'Node 20') { // Must match Global Tools name
                     sh 'npm install'
                 }
             }
